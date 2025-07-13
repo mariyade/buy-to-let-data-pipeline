@@ -1,101 +1,95 @@
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime
 import pandas as pd
-import sqlite3
 import time
+import sys
+import os
 
-from tasks import scrape, clean, yield_calculations
+# Add modules to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'modules')))
 
-def run_scrape(**context):
-    postcode_map = pd.read_csv('/opt/airflow/data/postcode_location_map.csv')
+from db import save_to_db, load_from_db
+from rightmove_scraper import scrape_listings, DEFAULT_BUY_FILTERS, DEFAULT_RENT_FILTERS
+from cleaner import clean_data
+from yield_calculator import calculate_gross_yield_all, calculate_net_yield
 
-    conn = sqlite3.connect('/opt/airflow/data/properties.db')
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': datetime(2025, 7, 13),
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+}
 
+dag = DAG(
+    'property_scraping_pipeline',
+    default_args=default_args,
+    description='DAG for scraping and analyzing property listings',
+    schedule_interval=timedelta(days=1),  # Run daily; adjust as needed
+    catchup=False,
+)
+
+def scrape_all_postcodes(**kwargs):
+    postcode_map = pd.read_csv(os.path.join(os.path.dirname(__file__), '..', 'data', 'postcode_location_map.csv'))
+    
     for idx, row in postcode_map.iterrows():
         postcode = row['Postcode']
         location_id = row['LocationIdentifier']
 
-        filterSale = {
-            'searchLocation': postcode,
-            'useLocationIdentifier': 'true',
-            'locationIdentifier': location_id,
-            'radius': 0.25,
-            'minPrice': 200000,
-            'maxPrice': 900000,
-            'minBedrooms': 1,
-            'maxBedrooms': 1,
-            'propertyTypes': 'flat',
-            '_includeSSTC': 'on',
-            'dontShow': 'newHome,retirement,sharedOwnership,auction',
-            'sortType': 6,
-            'channel': 'BUY',
-            'transactionType': 'BUY',
-            'displayLocationIdentifier': 'undefined'
-        }
+        buy_filters = DEFAULT_BUY_FILTERS.copy()
+        buy_filters.update({'searchLocation': postcode, 'locationIdentifier': location_id})
 
-        filterRent = {
-            'searchLocation': postcode,
-            'useLocationIdentifier': 'true',
-            'locationIdentifier': location_id,
-            'radius': 0.25,
-            'minBedrooms': 1,
-            'maxBedrooms': 1,
-            'includeLetAgreed': 'on',
-            'dontShow': 'retirement,student,houseShare',
-            'sortType': 6,
-            'channel': 'RENT',
-            'transactionType': 'LETTING',
-            'displayLocationIdentifier': 'undefined'
-        }
+        rent_filters = DEFAULT_RENT_FILTERS.copy()
+        rent_filters.update({'searchLocation': postcode, 'locationIdentifier': location_id})
 
-        df_buy = scrape.scrape_listings(filterSale, max_pages=1, channel='BUY')
-        df_rent = scrape.scrape_listings(filterRent, max_pages=1, channel='RENT')
+        df_buy = scrape_listings(buy_filters, max_pages=1, channel='BUY')
+        df_rent = scrape_listings(rent_filters, max_pages=1, channel='RENT')
 
-        clean_df_buy = clean.clean_data(df_buy)
-        clean_df_rent = clean.clean_data(df_rent)
+        clean_df_buy = clean_data(df_buy)
+        clean_df_rent = clean_data(df_rent)
 
         if not clean_df_buy.empty:
-            clean_df_buy.to_sql('buy_listings', conn, if_exists='append', index=False)
+            save_to_db(clean_df_buy, 'buy_listings')
         if not clean_df_rent.empty:
-            clean_df_rent.to_sql('rent_listings', conn, if_exists='append', index=False)
+            save_to_db(clean_df_rent, 'rent_listings')
 
         time.sleep(5)
 
-    conn.close()
+scrape_task = PythonOperator(
+    task_id='scrape_all_postcodes',
+    python_callable=scrape_all_postcodes,
+    provide_context=True,
+    dag=dag,
+)
 
-def run_calculate_yield(**context):
-    conn = sqlite3.connect('/opt/airflow/data/properties.db')
-
-    df_buy_all = pd.read_sql('SELECT * FROM buy_listings', conn)
-    df_rent_all = pd.read_sql('SELECT * FROM rent_listings', conn)
+def aggregate_and_calculate(**kwargs):
+    df_buy_all = load_from_db('buy_listings')
+    df_rent_all = load_from_db('rent_listings')
 
     avg_rent_per_postcode = df_rent_all.groupby('Postcode')['Price'].mean().to_dict()
 
-    df_buy_all = yield_calculations.calculate_gross_yield_all(df_buy_all, avg_rent_per_postcode)
-    df_buy_all = yield_calculations.calculate_net_yield(df_buy_all)
+    df_buy_all = calculate_gross_yield_all(df_buy_all, avg_rent_per_postcode, verbose=False)
+    df_buy_all = calculate_net_yield(df_buy_all, verbose=False)
 
-    df_buy_all.to_csv('/opt/airflow/data/buy_listings_with_yields.csv', index=False)
-    df_buy_all.to_sql('buy_listings_with_yields', conn, if_exists='replace', index=False)
+    df_buy_all.to_csv('buy_listings_with_yields.csv', index=False)
+    save_to_db(df_buy_all, 'buy_listings_with_yields', if_exists='replace')
 
-    conn.close()
+    yield_by_postcode = df_buy_all.groupby('Postcode').agg({
+        'Net_Yield_%': 'mean',
+        'Price': 'mean'
+    }).reset_index().sort_values('Net_Yield_%', ascending=False)
 
-with DAG(
-    dag_id="property_investment_pipeline",
-    start_date=datetime(2025, 7, 13),
-    schedule_interval="@daily",
-    catchup=False,
-    tags=["buy-to-let", "real-estate"],
-) as dag:
+    print("Average Net Yield by Postcode:")
+    print(yield_by_postcode)
 
-    scrape_task = PythonOperator(
-        task_id="scrape_listings",
-        python_callable=run_scrape,
-    )
+aggregate_task = PythonOperator(
+    task_id='aggregate_and_calculate',
+    python_callable=aggregate_and_calculate,
+    provide_context=True,
+    dag=dag,
+)
 
-    yield_task = PythonOperator(
-        task_id="calculate_yield",
-        python_callable=run_calculate_yield,
-    )
-
-    scrape_task >> yield_task
+scrape_task >> aggregate_task
