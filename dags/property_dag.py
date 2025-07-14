@@ -6,9 +6,6 @@ import time
 import sys
 import os
 
-# Add modules to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'modules')))
-
 from db import save_to_db, load_from_db
 from rightmove_scraper import scrape_listings, DEFAULT_BUY_FILTERS, DEFAULT_RENT_FILTERS
 from cleaner import clean_data
@@ -28,7 +25,7 @@ dag = DAG(
     'property_scraping_pipeline',
     default_args=default_args,
     description='DAG for scraping and analyzing property listings',
-    schedule_interval=timedelta(days=1),  # Run daily; adjust as needed
+    schedule_interval=timedelta(days=1), 
     catchup=False,
 )
 
