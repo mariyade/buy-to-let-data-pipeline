@@ -3,11 +3,12 @@ on:
   push:
     branches: [main]
 env:
-  ASTRO_API_TOKEN: ${{ secrets.ASTRO_API_TOKEN }}  # Your API token as a GitHub secret
+  ASTRO_API_TOKEN: ${{ secrets.ASTRO_API_TOKEN }}
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
     - name: Deploy to Astro
       uses: astronomer/deploy-action@v0.10.1
       with:
