@@ -13,3 +13,4 @@ jobs:
       uses: astronomer/deploy-action@v0.10.1
       with:
         deployment-id: arn:aws:iam::111928029897:role/astro-adiabatic-arc-8729
+        workspace: cmcrn14vo1ms001lyyu3tr8fr
