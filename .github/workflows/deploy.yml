@@ -9,8 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Install Astro CLI
+      run: curl -sSL https://install.astronomer.io | sudo bash -s
+    - name: Authenticate to Astro
+      run: astro login --token $ASTRO_API_TOKEN
     - name: Deploy to Astro
       uses: astronomer/deploy-action@v0.10.1
       with:
         deployment-id: arn:aws:iam::111928029897:role/astro-adiabatic-arc-8729
         workspace: cmcrn14vo1ms001lyyu3tr8fr
+
+
