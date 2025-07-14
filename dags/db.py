@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 
-DB_PATH = 'properties.db'
+DB_PATH = '/opt/airflow/dags/properties.db'
 
 def get_connection():
     return sqlite3.connect(DB_PATH)
