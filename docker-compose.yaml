@@ -10,6 +10,7 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags  # Mount your DAGs and modules
       - ./requirements.txt:/requirements.txt  # For custom deps
+      - ./airflow_data:/opt/airflow
     ports:
       - "8080:8080"  # Airflow UI
     command: standalone  # Runs webserver, scheduler, and init in one container
