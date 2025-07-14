@@ -1,26 +1,16 @@
 version: '3.8'
-
 services:
   airflow:
-    image: apache/airflow:2.8.1-python3.10
-    container_name: airflow
+    image: apache/airflow:3.0.2  # Matches your Airflow version
     environment:
-      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
-      AIRFLOW__CORE__FERNET_KEY: ''
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////usr/local/airflow/airflow.db  # Simple SQLite DB
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'  # Skip example DAGs
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-      AIRFLOW_UID: 50000
     volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
-      - ./plugins:/opt/airflow/plugins
-      - ./data:/opt/airflow/data
+      - ./dags:/opt/airflow/dags  # Mount your DAGs and modules
+      - ./requirements.txt:/requirements.txt  # For custom deps
     ports:
-      - "8080:8080"
-    command: >
-      bash -c "
-        airflow db init &&
-        airflow users create --username airflow --password airflow --firstname Admin --lastname User --role Admin --email airflow@example.com &&
-        airflow webserver
-      "
+      - "8080:8080"  # Airflow UI
+    command: standalone  # Runs webserver, scheduler, and init in one container
+    user: "${AIRFLOW_UID:-50000}:0"  # Avoid permission issues
