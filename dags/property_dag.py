@@ -21,14 +21,16 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-dag = DAG(
-    'property_scraping_pipeline',
-    default_args=default_args,
-    description='DAG for scraping and analyzing property listings',
-    schedule_interval=timedelta(days=1), 
+@dag(
+    schedule_interval=timedelta(days=1),
+    start_date=datetime(2025, 7, 13),
     catchup=False,
+    default_args=default_args,
+    description="DAG for scraping and analyzing property listings"
 )
+def property_scraping_pipeline():
 
+@task()
 def scrape_all_postcodes(**kwargs):
     postcode_map = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data', 'postcode_location_map.csv'))
     
@@ -45,13 +47,10 @@ def scrape_all_postcodes(**kwargs):
         df_buy = scrape_listings(buy_filters, max_pages=1, channel='BUY')
         df_rent = scrape_listings(rent_filters, max_pages=1, channel='RENT')
 
-        clean_df_buy = clean_data(df_buy)
-        clean_df_rent = clean_data(df_rent)
-
-        if not clean_df_buy.empty:
-            save_to_db(clean_df_buy, 'buy_listings')
-        if not clean_df_rent.empty:
-            save_to_db(clean_df_rent, 'rent_listings')
+        if not df_buy.empty:
+            save_to_db(df_buy, 'raw_buy_listings')
+        if not df_rent.empty:
+            save_to_db(df_rent, 'raw_rent_listings')
 
         time.sleep(5)
 
@@ -62,6 +61,26 @@ scrape_task = PythonOperator(
     dag=dag,
 )
 
+@task()
+def clean_listings(**kwargs):
+    df_raw_buy = load_from_db('raw_buy_listings')
+    df_raw_rent = load_from_db('raw_rent_listings')
+
+    clean_df_buy = clean_data(df_raw_buy)
+    clean_df_rent = clean_data(df_raw_rent)
+
+    if not clean_df_buy.empty:
+        save_to_db(clean_df_buy, 'buy_listings', if_exists='replace')
+    if not clean_df_rent.empty:
+        save_to_db(clean_df_rent, 'rent_listings', if_exists='replace')
+
+clean_task = PythonOperator(
+    task_id='clean_listings',
+    python_callable=clean_listings,
+    provide_context=True,
+    dag=dag,
+)
+@task()
 def aggregate_and_calculate(**kwargs):
     df_buy_all = load_from_db('buy_listings')
     df_rent_all = load_from_db('rent_listings')
@@ -89,4 +108,4 @@ aggregate_task = PythonOperator(
     dag=dag,
 )
 
-scrape_task >> aggregate_task
+scrape_task >> clean_task >> aggregate_task
