@@ -21,16 +21,14 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-@dag(
-    schedule_interval=timedelta(days=1),
-    start_date=datetime(2025, 7, 13),
-    catchup=False,
+dag = DAG(
+    'property_scraping_pipeline',
     default_args=default_args,
-    description="DAG for scraping and analyzing property listings"
+    description='DAG for scraping and analyzing property listings',
+    schedule_interval=timedelta(days=1), 
+    catchup=False,
 )
-def property_scraping_pipeline():
 
-@task()
 def scrape_all_postcodes(**kwargs):
     postcode_map = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data', 'postcode_location_map.csv'))
     
@@ -61,7 +59,6 @@ scrape_task = PythonOperator(
     dag=dag,
 )
 
-@task()
 def clean_listings(**kwargs):
     df_raw_buy = load_from_db('raw_buy_listings')
     df_raw_rent = load_from_db('raw_rent_listings')
@@ -80,7 +77,7 @@ clean_task = PythonOperator(
     provide_context=True,
     dag=dag,
 )
-@task()
+
 def aggregate_and_calculate(**kwargs):
     df_buy_all = load_from_db('buy_listings')
     df_rent_all = load_from_db('rent_listings')
