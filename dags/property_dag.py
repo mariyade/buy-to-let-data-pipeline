@@ -30,7 +30,7 @@ dag = DAG(
 )
 
 def scrape_all_postcodes(**kwargs):
-    postcode_map = pd.read_csv(os.path.join(os.path.dirname(__file__), '..', 'data', 'postcode_location_map.csv'))
+    postcode_map = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data', 'postcode_location_map.csv'))
     
     for idx, row in postcode_map.iterrows():
         postcode = row['Postcode']
