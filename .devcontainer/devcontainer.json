@@ -1,0 +1,17 @@
+{
+  "name": "Airflow Codespace",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "postCreateCommand": "airflow db init",
+  "forwardPorts": [8080],
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}
