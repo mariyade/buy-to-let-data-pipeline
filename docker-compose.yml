@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  airflow:
+    image: apache/airflow:2.10.0 
+    command: standalone 
+    ports:
+      - "8080:8080"  
+    volumes:
+      - ./dags:/opt/airflow/dags 
+      - ./properties.db:/opt/airflow/properties.db  
+    environment:
+      AIRFLOW_UID: 1000  
+      AIRFLOW__DATABASE__LOAD_EXAMPLES: 'false'  
