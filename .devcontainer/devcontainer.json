@@ -1,13 +1,8 @@
 {
   "name": "Airflow Codespace",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
-  "settings": {
-    "terminal.integrated.defaultProfile.linux": "bash"
-  },
-  "postCreateCommand": "airflow db init",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "airflow",
+  "workspaceFolder": "/workspaces/your-repo-name",
   "forwardPorts": [8080],
   "customizations": {
     "vscode": {
