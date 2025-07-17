@@ -85,9 +85,33 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 
 ---
 
-## 🏦 Storage
+## Storage
 
 All data is stored in a local SQLite database:
 - `raw_sale_listings`, `raw_rent_listings`
 - `buy_listings`, `rent_listings`
 - `buy_listings_with_yields`
+
+### Example Output: Successful Execution
+
+To see what a successful pipeline run looks like, here's a screenshot of the Airflow DAG after successful execution:
+
+<img width="915" height="472" alt="dag" src="https://github.com/user-attachments/assets/cd37279a-ee53-40c3-8b86-088ab1fff582" />
+
+At the end of a successful run, the pipeline produces a CSV file named:
+
+```text
+buy_listings_with_yields.csv
+```
+
+This file is saved locally and contains cleaned, processed, and yield-calculated buy-to-let property listings with the following columns:
+
+- Address
+- Postcode
+- Price
+- Rooms
+- Link
+- DateLastUpdated
+- EstimatedAnnualRent
+- Gross_Yield_%
+- Net_Yield_%
