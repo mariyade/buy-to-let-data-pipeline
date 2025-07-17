@@ -1,7 +1,5 @@
-apache-airflow==2.7.1
 pandas
 requests
 beautifulsoup4
-lxml
-PyYAML
-sqlalchemy
+matplotlib
+seaborn
