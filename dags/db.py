@@ -6,7 +6,7 @@ DB_PATH = '/opt/airflow/properties.db'
 def get_connection():
     return sqlite3.connect(DB_PATH)
 
-def save_to_db(df, table_name, if_exists='append'):
+def save_to_db(df, table_name, if_exists='replace'):
     with get_connection() as conn:
         df.to_sql(table_name, conn, if_exists=if_exists, index=False)
 
