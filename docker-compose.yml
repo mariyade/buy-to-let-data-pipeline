@@ -1,18 +1,14 @@
-version: '3'
+version: '3.8'
 services:
   airflow:
-    image: apache/airflow:2.7.1
-    environment:
-      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
-      - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX=True
+    build: .
+    command: standalone
     ports:
       - "8080:8080"
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
-      - ./plugins:/opt/airflow/plugins
-    command: >
-      bash -c "airflow db upgrade &&
-               airflow users create --username admin --firstname Ma --lastname D --role Admin --email admin@example.com --password admin --quiet || true &&
-               airflow webserver"
+      - ./properties.db:/opt/airflow/properties.db
+    environment:
+      - AIRFLOW_UID=503
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - PYTHONWARNINGS=ignore::SyntaxWarning  
