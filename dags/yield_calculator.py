@@ -11,44 +11,20 @@ def calculate_stamp_duty(price, is_buy_to_let=True):
         base += 0.12 * (price - 1500000)
     return base + surcharge
 
-def calculate_gross_yield(df_buy, df_rent, verbose=True):
-    if df_rent.empty or df_buy.empty:
-        print("No data to calculate gross yield")
-        return df_buy
-
-    avg_monthly_rent = df_rent['Price'].mean()
-    annual_rent = avg_monthly_rent * 12
-
-    if verbose:
-        print(f"Average monthly rent: £{avg_monthly_rent:.2f}")
-        print(f"Annual rent: £{annual_rent:.2f}")
-
-    df_buy['EstimatedAnnualRent'] = annual_rent
-    df_buy['Gross_Yield_%'] = (annual_rent / df_buy['Price']) * 100
-
-    if verbose:
-        print("\nTop properties by Gross Yield:")
-        print(df_buy[['Address', 'Price', 'Gross_Yield_%']].sort_values('Gross_Yield_%', ascending=False).head(5))
-
-    return df_buy
-
-def calculate_gross_yield_all(df_buy, avg_rent_per_postcode, verbose=True):
-    def get_annual_rent(postcode):
-        avg_monthly = avg_rent_per_postcode.get(postcode, 0)  
+def calculate_gross_yield(df_buy, avg_rent_per_postcode_room):
+    def get_annual_rent(row):
+        key = (row['Postcode'], row['Rooms'])
+        avg_monthly = avg_rent_per_postcode_room.get(key)
+        if avg_monthly is None:
+            return None  
         return avg_monthly * 12
 
-    df_buy['EstimatedAnnualRent'] = df_buy['Postcode'].apply(get_annual_rent)
+    df_buy['EstimatedAnnualRent'] = df_buy.apply(get_annual_rent, axis=1)
     df_buy['Gross_Yield_%'] = (df_buy['EstimatedAnnualRent'] / df_buy['Price']) * 100
-
-    if verbose:
-        print("\nTop properties by Gross Yield (all areas):")
-        print(df_buy[['Postcode', 'Address', 'Price', 'Gross_Yield_%']].sort_values('Gross_Yield_%', ascending=False).head(5))
-
     return df_buy
 
-def calculate_net_yield(df_buy, void_rate=0.05, annual_maintenance_rate=0.01, management_fee_rate=0.10, mortgage_rate=0.0515, ltv=0.75, verbose=True):
+def calculate_net_yield(df_buy, void_rate=0.05, annual_maintenance_rate=0.01, management_fee_rate=0.10, mortgage_rate=0.0515, ltv=0.75):
     if df_buy.empty or 'EstimatedAnnualRent' not in df_buy.columns:
-        print("Missing data or gross yield not calculated")
         return df_buy
 
     df = df_buy.copy()
@@ -59,11 +35,6 @@ def calculate_net_yield(df_buy, void_rate=0.05, annual_maintenance_rate=0.01, ma
 
     net_income = rent_after_voids - maintenance_cost - management_cost - mortgage_interest
     df['Net_Yield_%'] = (net_income / df['Price']) * 100
-
-    if verbose:
-        print("\n Top properties by Net Yield:")
-        print(df[['Address', 'Price', 'Net_Yield_%']].sort_values(by='Net_Yield_%', ascending=False).head(20))
-
     return df
 
 

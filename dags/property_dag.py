@@ -12,7 +12,9 @@ from db import save_to_db, load_from_db
 from scraping import scrape_listings
 from config.config_filters import filterSale, filterRent, scrapeParam
 from cleaner import clean_data
-from yield_calculator import calculate_gross_yield_all, calculate_net_yield
+from load_data import load_listings
+from yield_calculator import calculate_gross_yield, calculate_net_yield
+from print_outputs import print_top_20_by_net_yield, print_price_summary
 
 default_args = {
     'owner': 'airflow',
@@ -88,42 +90,35 @@ def clean_listings(**kwargs):
         save_to_db(clean_df_rent, 'rent_listings', if_exists='replace')
 
 def aggregate_and_calculate(**kwargs):
-    df_buy_all = load_from_db('buy_listings')
-    df_rent_all = load_from_db('rent_listings')
+    df_buy_all, df_rent_all = load_listings()
 
-    avg_rent_per_postcode = df_rent_all.groupby('Postcode')['Price'].mean().to_dict()
+    avg_rent_per_postcode = df_rent_all.groupby(['Postcode', 'Rooms'])['Price'].mean().to_dict()
 
-    df_buy_all = calculate_gross_yield_all(df_buy_all, avg_rent_per_postcode, verbose=True)
-    df_buy_all = calculate_net_yield(df_buy_all, verbose=True)
+    df_buy_all = calculate_gross_yield(df_buy_all, avg_rent_per_postcode)
+    df_buy_all = calculate_net_yield(df_buy_all)
 
     df_buy_all['Net_Yield_%'] = df_buy_all['Net_Yield_%'].round(2)
+    df_buy_all['Gross_Yield_%'] = df_buy_all['Gross_Yield_%'].round(2)
     df_buy_all.to_csv('buy_listings_with_yields.csv', index=True)
     save_to_db(df_buy_all, 'buy_listings_with_yields', if_exists='replace')
 
-    top_20_yield = df_buy_all.sort_values('Net_Yield_%', ascending=False).head(20)
-    print("\nTop 20 Properties by Net Yield:")
-    print(top_20_yield[['Postcode', 'Net_Yield_%', 'Price', 'Rooms', 'Address', 'Link']])
-
-    yield_by_postcode = df_buy_all.groupby('Postcode').agg({
-        'Net_Yield_%': 'mean',
-        'Price': 'mean'
-    }).reset_index().sort_values('Net_Yield_%', ascending=False)
-
-    print("\nAverage Net Yield by Postcode:")
-    print(yield_by_postcode)
+    print_top_20_by_net_yield(df_buy_all)
+    print_price_summary(df_buy_all, df_rent_all)
 
 def visualize_net_yield(**kwargs):
     df_buy_all = load_from_db('buy_listings_with_yields')
 
-    yield_by_postcode = df_buy_all.groupby('Postcode').agg({
-        'Net_Yield_%': 'mean',
-        'Price': 'mean'
-    }).reset_index().sort_values('Net_Yield_%', ascending=False)
+    yield_by_postcode = (df_buy_all.groupby(['Postcode', 'Rooms']).agg({'Net_Yield_%': 'mean', 'Price': 'mean'}).reset_index().sort_values('Net_Yield_%', ascending=False))
+    plt.figure(figsize=(12, 7))
+    sns.barplot(
+        data=yield_by_postcode,
+        x='Postcode',
+        y='Net_Yield_%',
+        hue='Rooms',
+        palette='Blues_d'
+    )
 
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=yield_by_postcode, x='Postcode', y='Net_Yield_%', palette='Blues_d')
-
-    plt.title('Average Net Yield by Postcode')
+    plt.title('Average Net Yield by Postcode and Number of Rooms')
     plt.xlabel('Postcode')
     plt.ylabel('Net Yield (%)')
     plt.xticks(rotation=45)
