@@ -1,5 +1,16 @@
 import pandas as pd
 
+def calculate_stamp_duty(price, is_buy_to_let=True):
+    surcharge = 0.03 * price if is_buy_to_let else 0
+    base = 0
+    if price > 250000:
+        base += 0.05 * min(price - 250000, 675000)
+    if price > 925000:
+        base += 0.10 * min(price - 925000, 575000)
+    if price > 1500000:
+        base += 0.12 * (price - 1500000)
+    return base + surcharge
+
 def calculate_gross_yield(df_buy, df_rent, verbose=True):
     if df_rent.empty or df_buy.empty:
         print("No data to calculate gross yield")
@@ -23,7 +34,7 @@ def calculate_gross_yield(df_buy, df_rent, verbose=True):
 
 def calculate_gross_yield_all(df_buy, avg_rent_per_postcode, verbose=True):
     def get_annual_rent(postcode):
-        avg_monthly = avg_rent_per_postcode.get(postcode, 0)  # Fallback if no rent data
+        avg_monthly = avg_rent_per_postcode.get(postcode, 0)  
         return avg_monthly * 12
 
     df_buy['EstimatedAnnualRent'] = df_buy['Postcode'].apply(get_annual_rent)
@@ -50,19 +61,9 @@ def calculate_net_yield(df_buy, void_rate=0.05, annual_maintenance_rate=0.01, ma
     df['Net_Yield_%'] = (net_income / df['Price']) * 100
 
     if verbose:
-        print("\n📉 Top properties by Net Yield:")
-        print(df[['Address', 'Price', 'Net_Yield_%']].sort_values(by='Net_Yield_%', ascending=False).head(5))
+        print("\n Top properties by Net Yield:")
+        print(df[['Address', 'Price', 'Net_Yield_%']].sort_values(by='Net_Yield_%', ascending=False).head(20))
 
     return df
 
-def calculate_stamp_duty(price, is_buy_to_let=True):
-    surcharge = 0.03 * price if is_buy_to_let else 0
-    base = 0
-    if price > 250000:
-        base += 0.05 * min(price - 250000, 675000)
-    if price > 925000:
-        base += 0.10 * min(price - 925000, 575000)
-    if price > 1500000:
-        base += 0.12 * (price - 1500000)
 
-    return base + surcharge
