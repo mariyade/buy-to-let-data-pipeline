@@ -99,12 +99,16 @@ def aggregate_and_calculate(**kwargs):
     df_buy_all.to_csv('buy_listings_with_yields.csv', index=True)
     save_to_db(df_buy_all, 'buy_listings_with_yields', if_exists='replace')
 
+    top_20_yield = df_buy_all.sort_values('Net_Yield_%', ascending=False).head(20)
+    print("\nTop 20 Properties by Net Yield:")
+    print(top_20_yield[['Postcode', 'Net_Yield_%', 'Price', 'Bedrooms', 'Address', 'URL']])
+
     yield_by_postcode = df_buy_all.groupby('Postcode').agg({
         'Net_Yield_%': 'mean',
         'Price': 'mean'
     }).reset_index().sort_values('Net_Yield_%', ascending=False)
 
-    print("Average Net Yield by Postcode:")
+    print("\nAverage Net Yield by Postcode:")
     print(yield_by_postcode)
 
 def visualize_net_yield(**kwargs):
