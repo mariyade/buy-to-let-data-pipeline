@@ -12,7 +12,6 @@ from db import save_to_db, load_from_db
 from scraping import scrape_listings
 from config.config_filters import filterSale, filterRent, scrapeParam
 from cleaner import clean_data
-from load_data import load_listings
 from yield_calculator import calculate_gross_yield, calculate_net_yield
 from print_outputs import print_top_20_by_net_yield, print_price_summary
 
@@ -90,7 +89,8 @@ def clean_listings(**kwargs):
         save_to_db(clean_df_rent, 'rent_listings', if_exists='replace')
 
 def aggregate_and_calculate(**kwargs):
-    df_buy_all, df_rent_all = load_listings()
+    df_buy_all = load_from_db('buy_listings')
+    df_rent_all = load_from_db('rent_listings')
 
     avg_rent_per_postcode = df_rent_all.groupby(['Postcode', 'Rooms'])['Price'].mean().to_dict()
 
