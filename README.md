@@ -115,3 +115,12 @@ This file is saved locally and contains cleaned, processed, and yield-calculated
 - EstimatedAnnualRent
 - Gross_Yield_%
 - Net_Yield_%
+
+### Example Dashboard (Looker Studio)
+
+Google Looker Studio was used to experiment with visualising the final dataset.
+
+The screenshot below shows example insights from a successful run:
+<img width="828" height="648" alt="Screenshot 2025-07-18 at 00 23 07" src="https://github.com/user-attachments/assets/8b7cbff6-2edf-465f-8c47-02c28d7fbead" />
+
+
