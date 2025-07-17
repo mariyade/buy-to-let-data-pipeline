@@ -96,6 +96,7 @@ def aggregate_and_calculate(**kwargs):
     df_buy_all = calculate_gross_yield_all(df_buy_all, avg_rent_per_postcode, verbose=True)
     df_buy_all = calculate_net_yield(df_buy_all, verbose=True)
 
+    df_buy_all['Net_Yield_%'] = df_buy_all['Net_Yield_%'].round(2)
     df_buy_all.to_csv('buy_listings_with_yields.csv', index=True)
     save_to_db(df_buy_all, 'buy_listings_with_yields', if_exists='replace')
 
