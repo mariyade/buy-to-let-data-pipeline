@@ -2,7 +2,7 @@
 
 End-to-end data pipeline to automate the scraping, processing, and analysis of buy-to-let property listings across key UK cities.
 
-<img width="828" height="648" alt="Screenshot 2025-07-18 at 00 23 07" src="https://github.com/user-attachments/assets/af97baef-492b-46cb-95db-31cc2279647a" />
+<img width="628" height="448" alt="Screenshot 2025-07-18 at 00 23 07" src="https://github.com/user-attachments/assets/af97baef-492b-46cb-95db-31cc2279647a" />
 
 
 ---
