@@ -10,7 +10,7 @@ import os
 
 from db import save_to_db, load_from_db
 from scraping import scrape_listings
-from config.config_filter import filterSale, filterRent, scrapeParam
+from config.config_filters import filterSale, filterRent, scrapeParam
 from cleaner import clean_data
 from yield_calculator import calculate_gross_yield_all, calculate_net_yield
 
@@ -142,11 +142,11 @@ aggregate_task = PythonOperator(
     dag=dag,
 )
 
-visualize_net_yield = PythonOperator(
+visualize_net_task = PythonOperator(
     task_id='visualize_net_yield',
     python_callable=visualize_net_yield,
     provide_context=True,
     dag=dag,
 )
 
-scrape_sale_task >> scrape_rent_task >> clean_task >> aggregate_task >> visualize_net_yield
+scrape_sale_task >> scrape_rent_task >> clean_task >> aggregate_task >> visualize_net_task
