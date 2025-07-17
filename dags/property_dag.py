@@ -35,7 +35,9 @@ dag = DAG(
 def scrape_sale_listings(**kwargs):
     postcode_map = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data', 'postcode_location_map.csv'))
     
-    for idx, row in postcode_map.iterrows():
+    all_buy = [] 
+
+    for _, row in postcode_map.iterrows():
         postcode = row['Postcode']
         location_id = row['LocationIdentifier']
 
@@ -45,13 +47,19 @@ def scrape_sale_listings(**kwargs):
         df_buy = scrape_listings(buy_filters, scrapeParam['max_pages'], channel='BUY')
 
         if not df_buy.empty:
-            save_to_db(df_buy, 'raw_sale_listings')
+            all_buy.append(df_buy)  
         time.sleep(5)
+
+    if all_buy:
+        df_all = pd.concat(all_buy, ignore_index=True)
+        save_to_db(df_all, 'raw_sale_listings', if_exists='replace') 
 
 def scrape_rent_listings(**kwargs):
     postcode_map = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data', 'postcode_location_map.csv'))
-    
-    for idx, row in postcode_map.iterrows():
+
+    all_rent = []  
+
+    for _, row in postcode_map.iterrows():
         postcode = row['Postcode']
         location_id = row['LocationIdentifier']
 
@@ -60,8 +68,12 @@ def scrape_rent_listings(**kwargs):
         df_rent = scrape_listings(rent_filters, scrapeParam['max_pages'], channel='RENT')
 
         if not df_rent.empty:
-            save_to_db(df_rent, 'raw_rent_listings')
+            all_rent.append(df_rent)  
         time.sleep(5)
+
+    if all_rent:
+        df_all = pd.concat(all_rent, ignore_index=True)
+        save_to_db(df_all, 'raw_rent_listings', if_exists='replace')
 
 def clean_listings(**kwargs):
     df_raw_buy = load_from_db('raw_sale_listings')
