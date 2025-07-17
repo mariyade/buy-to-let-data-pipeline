@@ -101,7 +101,7 @@ def aggregate_and_calculate(**kwargs):
 
     top_20_yield = df_buy_all.sort_values('Net_Yield_%', ascending=False).head(20)
     print("\nTop 20 Properties by Net Yield:")
-    print(top_20_yield[['Postcode', 'Net_Yield_%', 'Price', 'Bedrooms', 'Address', 'URL']])
+    print(top_20_yield[['Postcode', 'Net_Yield_%', 'Price', 'Rooms', 'Address', 'Link']])
 
     yield_by_postcode = df_buy_all.groupby('Postcode').agg({
         'Net_Yield_%': 'mean',
