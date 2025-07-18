@@ -73,7 +73,7 @@ Example:
 
 
 
-This file is saved locally and contains cleaned, processed, and yield-calculated buy-to-let property listings with the following columns:
+The CSV file is saved locally and contains cleaned, processed, and yield-calculated buy-to-let property listings with the following columns:
 
 - Address
 - Postcode
