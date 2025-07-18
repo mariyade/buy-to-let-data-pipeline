@@ -54,32 +54,32 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 
 ## Airflow DAG Data Pipeline Tasks
 
-### 1. `scrape_sale_listings`
+### 1. scrape_sale_listings
 - Loads postcodes from `data/postcode_location_map.csv`
 - Applies filters from `config_filters.py`
 - Scrapes sale listings from Rightmove
 - Saves results to SQLite table: `raw_sale_listings`
 
-### 2. `scrape_rent_listings`
+### 2. scrape_rent_listings
 - Same as above but for rental listings
 - Saves to: `raw_rent_listings`
 
-### 3. `clean_listings`
+### 3. clean_listings
 - Cleans raw sale and rent data using `clean_data()`
 - Saves cleaned versions to `buy_listings` and `rent_listings`
 
-### 4. `aggregate_and_calculate`
+### 4. aggregate_and_calculate
 - Joins listings with average rent (by postcode + room)
 - Calculates:
-  - `EstimatedAnnualRent`
-  - `Gross_Yield_%`
-  - `Net_Yield_%`
+  - EstimatedAnnualRent
+  - Gross_Yield_%
+  - Net_Yield_%
 - Saves output to `buy_listings_with_yields.csv` and DB
 - Logs:
-  - Top 20 properties by **Net Yield**
+  - Top 20 properties by Net Yield
   - Summary of prices per room and postcode
 
-### 5. `visualize_net_yield`
+### 5. visualize_net_yield
 - Generates a bar chart:
   - **X-axis**: Postcode  
   - **Y-axis**: Avg Net Yield (%)  
