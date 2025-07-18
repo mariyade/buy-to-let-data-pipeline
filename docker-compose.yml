@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   airflow:
     build: .
@@ -9,6 +10,6 @@ services:
       - ./dags:/opt/airflow/dags
       - ./properties.db:/opt/airflow/properties.db
     environment:
-      - AIRFLOW_UID=503
-      - AIRFLOW__CORE__LOAD_EXAMPLES=false
-      - PYTHONWARNINGS=ignore::SyntaxWarning  
+      AIRFLOW_UID: "503"
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      PYTHONWARNINGS: "ignore::SyntaxWarning"
