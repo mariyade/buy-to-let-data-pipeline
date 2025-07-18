@@ -51,6 +51,41 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 - **Stamp Duty:** Based on embedded UK tiered rules
 
 ---
+### Example Output: Successful Execution
+
+To see what a successful pipeline run looks like, here's a screenshot of the Airflow DAG after successful execution:
+
+<img width="915" height="472" alt="dag" src="https://github.com/user-attachments/assets/cd37279a-ee53-40c3-8b86-088ab1fff582" />
+
+At the end of a successful run, the pipeline produces a CSV file named:
+
+```text
+buy_listings_with_yields.csv
+```
+
+and 
+
+```text
+net_yield_by_postcode.png
+```
+Example:
+<img width="1200" height="700" alt="net_yield_by_postcode" src="https://github.com/user-attachments/assets/9a4ef7f2-468d-47a5-8d9e-125cf967f092" />
+
+
+
+This file is saved locally and contains cleaned, processed, and yield-calculated buy-to-let property listings with the following columns:
+
+- Address
+- Postcode
+- Price
+- Rooms
+- Link
+- DateLastUpdated
+- EstimatedAnnualRent
+- Gross_Yield_%
+- Net_Yield_%
+
+---
 
 ## Airflow DAG Data Pipeline Tasks
 
@@ -94,30 +129,6 @@ All data is stored in a local SQLite database:
 - `raw_sale_listings`, `raw_rent_listings`
 - `buy_listings`, `rent_listings`
 - `buy_listings_with_yields`
-
-### Example Output: Successful Execution
-
-To see what a successful pipeline run looks like, here's a screenshot of the Airflow DAG after successful execution:
-
-<img width="915" height="472" alt="dag" src="https://github.com/user-attachments/assets/cd37279a-ee53-40c3-8b86-088ab1fff582" />
-
-At the end of a successful run, the pipeline produces a CSV file named:
-
-```text
-buy_listings_with_yields.csv
-```
-
-This file is saved locally and contains cleaned, processed, and yield-calculated buy-to-let property listings with the following columns:
-
-- Address
-- Postcode
-- Price
-- Rooms
-- Link
-- DateLastUpdated
-- EstimatedAnnualRent
-- Gross_Yield_%
-- Net_Yield_%
 
 ### Example Dashboard (Looker Studio)
 
