@@ -1,15 +1,17 @@
-import sqlite3
 import pandas as pd
+from sqlalchemy import create_engine
 
-DB_PATH = '/opt/airflow/properties.db'
+DB_URL = 'postgresql+psycopg2://airflow:airflow@postgres:5432/airflow'
 
 def get_connection():
-    return sqlite3.connect(DB_PATH)
+    engine = create_engine(DB_URL)
+    return engine.connect()
 
 def save_to_db(df, table_name, if_exists='replace'):
-    with get_connection() as conn:
-        df.to_sql(table_name, conn, if_exists=if_exists, index=False)
+    engine = create_engine(DB_URL)
+    df.to_sql(table_name, engine, if_exists=if_exists, index=False)
+
 
 def load_from_db(table_name):
-    with get_connection() as conn:
-        return pd.read_sql(f'SELECT * FROM {table_name}', conn)
+    engine = create_engine(DB_URL)
+    return pd.read_sql(f'SELECT * FROM {table_name}', engine)
