@@ -39,7 +39,7 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 - **Language:** Python  
 - **Workflow Orchestration:** Apache Airflow  
 - **Containerization:** Docker, Docker Compose  
-- **Database:** SQLite (for PoC, can be swapped for BigQuery/Postgres)  
+- **Database:** Postgres
 - **Visualization:** Google Looker Studio, Matplotlib, Seaborn  
 
 ---
@@ -93,7 +93,7 @@ The CSV file is saved locally and contains cleaned, processed, and yield-calcula
 - Loads postcodes from `data/postcode_location_map.csv`
 - Applies filters from `config_filters.py`
 - Scrapes sale listings from Rightmove
-- Saves results to SQLite table: `raw_sale_listings`
+- Saves results to PostgreSQL table: `raw_sale_listings`
 
 ### 2. scrape_rent_listings
 - Same as above but for rental listings
@@ -125,7 +125,7 @@ The CSV file is saved locally and contains cleaned, processed, and yield-calcula
 
 ## Storage
 
-All data is stored in a local SQLite database:
+All data is stored in a PostgreSQL database:
 - `raw_sale_listings`, `raw_rent_listings`
 - `buy_listings`, `rent_listings`
 - `buy_listings_with_yields`
