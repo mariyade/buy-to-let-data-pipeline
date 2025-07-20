@@ -58,11 +58,17 @@ This project uses **Terraform** to provision and manage Google Cloud resources a
 
 ### Outputs and Visuals
 
-- CSVs:
-  - `/opt/airflow/output/buy_listings_with_yields.csv` (all properties with calculated gross/net yields)
-  - `/opt/airflow/output/top_20_yield.csv` (top 20 by net yield)
+To see what a successful pipeline run looks like, here's a screenshot of the Airflow DAG after successful execution:
 
-- PNG: `net_yield_by_postcode.png` (bar chart of average net yield by postcode and room count)
+<img width="1167" height="565" alt="airflow-run" src="https://github.com/user-attachments/assets/3a25b94e-229c-4448-a1c8-dfa2d95ad2c8" />
+
+
+- CSVs:
+  - `/opt/airflow/output/buy_listings_with_yields.csv` (all properties with calculated gross/net yields  [artifacts/buy_listings_with_yields.csv](artifacts/buy_listings_with_yields.csv.csv)
+    
+  - /opt/airflow/output/top_20_yield.csv (top 20 by net yield)
+
+- PNG: net_yield_by_postcode.png (bar chart of average net yield by postcode and room count)
   
 <img width="550" height="320" alt="net_yield_by_postcode" src="https://github.com/user-attachments/assets/2f506de2-7ec6-4271-b486-7af61f68e9cb" />
 
