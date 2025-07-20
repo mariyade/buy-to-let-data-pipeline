@@ -1,16 +1,16 @@
 Postcode,LocationIdentifier,City
-E1,OUTCODE^744,London
-EC1A,OUTCODE^765,London
-E14,OUTCODE^749,London
-B1,OUTCODE^44,Birmingham
-B5,OUTCODE^86B,Birmingham
-B15,OUTCODE^50,Birmingham
-M1,OUTCODE^1564,Manchester
-M4,OUTCODE^1593,Manchester
-M14,OUTCODE^1568,Manchester
-L1,OUTCODE^1341,Liverpool
-L7,OUTCODE^1381,Liverpool
-L6,OUTCODE^1377,Liverpool
-BS1,OUTCODE^259,Bristol
-BS2,OUTCODE^266,Bristol
-BS6,OUTCODE^292,Bristol
+E1,OUTCODE^744,"London, UK"
+EC1A,OUTCODE^765,"London, UK"
+E14,OUTCODE^749,"London, UK"
+B1,OUTCODE^44,"Birmingham, UK"
+B5,OUTCODE^86B,"Birmingham, UK"
+B15,OUTCODE^50,"Birmingham, UK"
+M1,OUTCODE^1564,"Manchester, UK"
+M4,OUTCODE^1593,"Manchester, UK"
+M14,OUTCODE^1568,"Manchester, UK"
+L1,OUTCODE^1341,"Liverpool, UK"
+L7,OUTCODE^1381,"Liverpool, UK"
+L6,OUTCODE^1377,"Liverpool, UK"
+BS1,OUTCODE^259,"Bristol, UK"
+BS2,OUTCODE^266,"Bristol, UK"
+BS6,OUTCODE^292,"Bristol, UK"

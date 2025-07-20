@@ -32,6 +32,7 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 - **Language:** Python  
 - **Containerization:** Docker, Docker Compose  
 - **Workflow Orchestration:** Apache Airflow  
+- **Infrastructure as Code (IaC):** Terraform  
 - **Database:** PostgreSQL
 - **Cloud storage:** Google Cloud Storage (GCS)
 - **Cloud Data Warehouse:** Google BigQuery
@@ -46,6 +47,14 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 - **Stamp Duty:** Based on embedded UK tiered rules
 
 ---
+### Infrastructure Provisioning with Terraform
+
+This project uses **Terraform** to provision and manage Google Cloud resources automatically, enabling infrastructure-as-code and consistent deployment.
+
+###  Provisioned Resources:
+- **Google Cloud Storage (GCS) bucket**: `buy-to-let-uk-gcp-2025`
+- **BigQuery dataset**: `buy_to_let_data_2025`
+- **Service Account** with required IAM permissions
 
 ### Outputs and Visuals
 
@@ -54,7 +63,6 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
   - `/opt/airflow/output/top_20_yield.csv` (top 20 by net yield)
 
 - PNG: `net_yield_by_postcode.png` (bar chart of average net yield by postcode and room count)
-
   
 <img width="550" height="320" alt="net_yield_by_postcode" src="https://github.com/user-attachments/assets/2f506de2-7ec6-4271-b486-7af61f68e9cb" />
 
