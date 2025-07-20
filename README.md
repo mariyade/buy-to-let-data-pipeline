@@ -49,12 +49,14 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 
 ### Outputs and Visuals
 
-- CSV: `/opt/airflow/output/buy_listings_with_yields.csv` 
+- CSVs:
+  - `/opt/airflow/output/buy_listings_with_yields.csv` (all properties with calculated gross/net yields)
+  - `/opt/airflow/output/top_20_yield.csv` (top 20 by net yield)
 
 - PNG: `net_yield_by_postcode.png` (bar chart of average net yield by postcode and room count)
 
   
-<img width="600" height="350" alt="net_yield_by_postcode" src="https://github.com/user-attachments/assets/2f506de2-7ec6-4271-b486-7af61f68e9cb" />
+<img width="550" height="320" alt="net_yield_by_postcode" src="https://github.com/user-attachments/assets/2f506de2-7ec6-4271-b486-7af61f68e9cb" />
 
   
 - Upload of top_20_yield.csv to **Google Cloud Storage** via `upload_to_gcs()`
