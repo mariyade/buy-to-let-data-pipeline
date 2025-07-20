@@ -7,20 +7,13 @@ End-to-end data pipeline to automate the scraping, processing, and analysis of b
 
 ---
 
-## Background
+### Background
 
-This project is a proof of concept (PoC) for automating the analysis of buy-to-let property investment returns across major UK cities. It identifies properties with high rental yield based on scraped listings from Rightmove and calculates both gross and net yields.
-
-Built using **Python**, **Apache Airflow**, and **Docker**, the pipeline is modular and configurable, allowing users to specify:
-- Number of bedrooms  
-- Maximum property prices  
-- Search radius
-- Property type
-- Postcodes (via a CSV)
+This project is a proof of concept (PoC) for automating the analysis of buy-to-let property investment returns. It scrapes listings from Rightmove, calculates gross and net yields, and surfaces the most attractive properties based on yield.
 
 ---
 
-## Scope
+### Scope
 
 The PoC focuses on 5 major UK cities:
 
@@ -30,105 +23,51 @@ The PoC focuses on 5 major UK cities:
 - Liverpool  
 - Bristol
 
-For each city, 3 central postcodes were selected. These are defined in `data/postcode_location_map.csv` and can be updated. Filters such as bedrooms and radius are set in `dags/config/config_filters.py`.
+For each city, 3 central postcodes were selected. These are defined in `data/postcode_location_map.csv` and can be updated. Filters such as bedrooms, maximum property prices, and radius can be condfigured in `dags/config/config_filters.py`. 
 
 ---
 
-## Technology
+### Technology
 
 - **Language:** Python  
-- **Workflow Orchestration:** Apache Airflow  
 - **Containerization:** Docker, Docker Compose  
-- **Database:** Postgres
+- **Workflow Orchestration:** Apache Airflow  
+- **Database:** PostgreSQL
+- **Cloud storage:** Google Cloud Storage (GCS)
+- **Cloud Data Warehouse:** Google BigQuery
 - **Visualization:** Google Looker Studio, Matplotlib, Seaborn  
 
 ---
 
-## Data Sources
+### Data Sources
 
 - **Sale Listings:** Rightmove (scraped by postcode and Rightmove-specific `LocationIdentifier`)
 - **Rental Listings:** Rightmove (scraped by postcode and room count)
 - **Stamp Duty:** Based on embedded UK tiered rules
 
 ---
-### Example Output: Successful Execution
 
-To see what a successful pipeline run looks like, here's a screenshot of the Airflow DAG after successful execution:
+### Outputs and Visuals
 
-<img width="915" height="472" alt="dag" src="https://github.com/user-attachments/assets/cd37279a-ee53-40c3-8b86-088ab1fff582" />
-
-At the end of a successful run, the pipeline produces a CSV file named:
-
-```text
-buy_listings_with_yields.csv
-```
-
-and 
-
-```text
-net_yield_by_postcode.png
-```
-Example:
-<img width="1200" height="700" alt="net_yield_by_postcode" src="https://github.com/user-attachments/assets/9a4ef7f2-468d-47a5-8d9e-125cf967f092" />
-
-
-
-The CSV file is saved locally and contains cleaned, processed, and yield-calculated buy-to-let property listings with the following columns:
-
-- Address
-- Postcode
-- Price
-- Rooms
-- Link
-- DateLastUpdated
-- EstimatedAnnualRent
-- Gross_Yield_%
-- Net_Yield_%
+- CSV: `/opt/airflow/output/top_20_yield.csv` (top 20 by net yield)
+- PNG: `net_yield_by_postcode.png` (bar chart of average net yield by postcode and room count)
+- Upload to **Google Cloud Storage** via `upload_to_gcs()`
+- Load into **BigQuery** via `load_csv_to_bigquery()`
 
 ---
+### Data Storage
 
-## Airflow DAG Data Pipeline Tasks
+All data is stored in PostgreSQL:
 
-### 1. scrape_sale_listings
-- Loads postcodes from `data/postcode_location_map.csv`
-- Applies filters from `config_filters.py`
-- Scrapes sale listings from Rightmove
-- Saves results to PostgreSQL table: `raw_sale_listings`
-
-### 2. scrape_rent_listings
-- Same as above but for rental listings
-- Saves to: `raw_rent_listings`
-
-### 3. clean_listings
-- Cleans raw sale and rent data using `clean_data()`
-- Saves cleaned versions to `buy_listings` and `rent_listings`
-
-### 4. aggregate_and_calculate
-- Joins listings with average rent (by postcode + room)
-- Calculates:
-  - EstimatedAnnualRent
-  - Gross_Yield_%
-  - Net_Yield_%
-- Saves output to `buy_listings_with_yields.csv` and DB
-- Logs:
-  - Top 20 properties by Net Yield
-  - Summary of prices per room and postcode
-
-### 5. visualize_net_yield
-- Generates a bar chart:
-  - **X-axis**: Postcode  
-  - **Y-axis**: Avg Net Yield (%)  
-  - **Hue**: Room count  
-- Saves figure to `net_yield_by_postcode.png`
+| Table                         | Description                           |
+|------------------------------|---------------------------------------|
+| `raw_sale_listings`          | Uncleaned sale listings               |
+| `raw_rent_listings`          | Uncleaned rental listings             |
+| `buy_listings`               | Cleaned sale listings                 |
+| `rent_listings`              | Cleaned rental listings               |
+| `buy_listings_with_yields`   | Final enriched dataset with gross/net yields |
 
 ---
-
-## Storage
-
-All data is stored in a PostgreSQL database:
-- `raw_sale_listings`, `raw_rent_listings`
-- `buy_listings`, `rent_listings`
-- `buy_listings_with_yields`
 
 ### Example Dashboard (Looker Studio)
 
@@ -136,5 +75,3 @@ Google Looker Studio was used to experiment with visualising the final dataset.
 
 The screenshot below shows example insights from a successful run:
 <img width="828" height="648" alt="Screenshot 2025-07-18 at 00 23 07" src="https://github.com/user-attachments/assets/8b7cbff6-2edf-465f-8c47-02c28d7fbead" />
-
-
