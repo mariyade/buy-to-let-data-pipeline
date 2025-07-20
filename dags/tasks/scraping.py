@@ -67,6 +67,7 @@ def scrape_listings(filters, max_pages, channel):
 
                 listings.append({
                     'Address': address,
+                    'City': filters['city'],
                     'Postcode': filters['searchLocation'],
                     'Price': price,
                     'Rooms': room_count,

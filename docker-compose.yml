@@ -26,27 +26,18 @@ services:
     ports:
       - "8080:8080"
     volumes:
+      - ./entrypoint.sh:/opt/airflow/entrypoint.sh
       - ./dags:/opt/airflow/dags
-      - ./terraform/keys:/opt/airflow/terraform/key
+      - ./terraform/keys:/opt/airflow/terraform/keys
     environment:
-      AIRFLOW_UID: "503"  # Adjust if needed
+      AIRFLOW_UID: "503"
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/terraform/keys/my-creds.json
     depends_on:
       - postgres
-    command: >
-      bash -c "
-        airflow db upgrade &&
-        airflow users create \
-          --username airflow \
-          --password airflow \
-          --firstname Admin \
-          --lastname User \
-          --role Admin \
-          --email admin@example.com &&
-        airflow scheduler & airflow webserver
-      "
+    entrypoint: /opt/airflow/entrypoint.sh
 
 volumes:
   postgres_data:

@@ -44,9 +44,10 @@ def scrape_sale_listings(**kwargs):
     for _, row in postcode_map.iterrows():
         postcode = row['Postcode']
         location_id = row['LocationIdentifier']
+        city = row['City']
 
         buy_filters = filterSale.copy()
-        buy_filters.update({'searchLocation': postcode, 'locationIdentifier': location_id})
+        buy_filters.update({'searchLocation': postcode, 'locationIdentifier': location_id, 'city': city})
 
         df_buy = scrape_listings(buy_filters, scrapeParam['max_pages'], channel='BUY')
 
@@ -66,9 +67,10 @@ def scrape_rent_listings(**kwargs):
     for _, row in postcode_map.iterrows():
         postcode = row['Postcode']
         location_id = row['LocationIdentifier']
+        city = row['City']
 
         rent_filters = filterRent.copy()
-        rent_filters.update({'searchLocation': postcode, 'locationIdentifier': location_id})
+        rent_filters.update({'searchLocation': postcode, 'locationIdentifier': location_id, 'city': city})
         df_rent = scrape_listings(rent_filters, scrapeParam['max_pages'], channel='RENT')
 
         if not df_rent.empty:
@@ -77,6 +79,7 @@ def scrape_rent_listings(**kwargs):
 
     if all_rent:
         df_all = pd.concat(all_rent, ignore_index=True)
+        df_all = df_all.dropna(subset=['Address', 'Postcode', 'Price', 'Rooms', 'Link'])
         save_to_db(df_all, 'raw_rent_listings', if_exists='replace')
 
 def clean_listings(**kwargs):
@@ -172,7 +175,7 @@ upload_csv_task = PythonOperator(
     task_id='upload_csv_to_gcs',
     python_callable=upload_to_gcs,
     op_kwargs={
-        'bucket_name': 'buy-to-let-pipeline-bucket',
+        'bucket_name': 'buy-to-let-uk-gcp-2025',
         'source_file_path': '/opt/airflow/output/top_20_yield.csv',
         'destination_blob_name': 'top_20_yield.csv',
     },
@@ -182,9 +185,9 @@ load_to_bq_task = PythonOperator(
     task_id='load_csv_to_bigquery',
     python_callable=load_csv_to_bigquery,
     op_kwargs={
-        'bucket_name': 'buy-to-let-pipeline-bucket',
+        'bucket_name': 'buy-to-let-uk-gcp-2025',
         'source_blob_name': 'top_20_yield.csv',
-        'dataset_id': 'buy_to_let_data',
+        'dataset_id': 'buy_to_let_data_2025',
         'table_id': 'top_20_yield',
     },
 )

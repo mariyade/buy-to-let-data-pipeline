@@ -23,6 +23,9 @@ def parse_date(text):
 def clean_data(df):
     if df.empty:
         return df
+    required_cols = ['Address', 'Postcode', 'Price', 'Rooms', 'Link']
+    df = df.dropna(subset=required_cols)
+    df['Address'] = df['Address'].astype(str).str.replace('\n', ' ', regex=True)
     df['DateLastUpdated'] = df['DateLastUpdated'].apply(parse_date)
     df['Price'] = df['Price'].astype(str).str.extract(r'(\d{1,3}(?:,\d{3})*(?:\.\d+)?)')[0]
     df['Price'] = df['Price'].str.replace(',', '').astype(float)

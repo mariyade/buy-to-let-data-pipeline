@@ -22,10 +22,6 @@ def load_csv_to_bigquery(bucket_name, source_blob_name, dataset_id, table_id):
         write_disposition="WRITE_TRUNCATE",
     )
 
-    load_job = client.load_table_from_uri(
-        uri,
-        table_ref,
-        job_config=job_config,
-    )
-    load_job.result()
-    print(f"Loaded data into {table_ref}")
+    load_job = client.load_table_from_uri(uri, table_ref, job_config=job_config)
+    load_job.result()  
+    print(f"Loaded data into BigQuery: {table_ref}")

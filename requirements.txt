@@ -3,3 +3,7 @@ requests
 beautifulsoup4
 matplotlib
 seaborn
+sqlalchemy
+psycopg2-binary
+google-cloud-storage
+google-cloud-bigquery
