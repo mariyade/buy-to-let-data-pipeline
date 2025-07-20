@@ -7,13 +7,16 @@ import pandas as pd
 import time
 import sys
 import os
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/opt/airflow/terraform/keys/my-creds.json"
+
 
 from db import save_to_db, load_from_db
-from scraping import scrape_listings
+from tasks.scraping import scrape_listings
 from config.config_filters import filterSale, filterRent, scrapeParam
-from cleaner import clean_data
-from yield_calculator import calculate_gross_yield, calculate_net_yield
-from print_outputs import print_top_20_by_net_yield, print_price_summary
+from tasks.cleaner import clean_data
+from tasks.yield_calculator import calculate_gross_yield, calculate_net_yield
+from tasks.print_outputs import print_top_20_by_net_yield, print_price_summary
+from tasks.gcp_upload import upload_to_gcs, load_csv_to_bigquery
 
 default_args = {
     'owner': 'airflow',
@@ -89,6 +92,7 @@ def clean_listings(**kwargs):
         save_to_db(clean_df_rent, 'rent_listings', if_exists='replace')
 
 def aggregate_and_calculate(**kwargs):
+    os.makedirs('/opt/airflow/output', exist_ok=True)
     df_buy_all = load_from_db('buy_listings')
     df_rent_all = load_from_db('rent_listings')
 
@@ -101,6 +105,9 @@ def aggregate_and_calculate(**kwargs):
     df_buy_all['Gross_Yield_%'] = df_buy_all['Gross_Yield_%'].round(2)
     df_buy_all.to_csv('buy_listings_with_yields.csv', index=True)
     save_to_db(df_buy_all, 'buy_listings_with_yields', if_exists='replace')
+
+    top_20 = df_buy_all.sort_values('Net_Yield_%', ascending=False).head(20)
+    top_20.to_csv('/opt/airflow/output/top_20_yield.csv', index=False)
 
     print_top_20_by_net_yield(df_buy_all)
     print_price_summary(df_buy_all, df_rent_all)
@@ -161,4 +168,25 @@ visualize_net_task = PythonOperator(
     dag=dag,
 )
 
-scrape_sale_task >> scrape_rent_task >> clean_task >> aggregate_task >> visualize_net_task
+upload_csv_task = PythonOperator(
+    task_id='upload_csv_to_gcs',
+    python_callable=upload_to_gcs,
+    op_kwargs={
+        'bucket_name': 'buy-to-let-pipeline-bucket',
+        'source_file_path': '/opt/airflow/output/top_20_yield.csv',
+        'destination_blob_name': 'top_20_yield.csv',
+    },
+)
+
+load_to_bq_task = PythonOperator(
+    task_id='load_csv_to_bigquery',
+    python_callable=load_csv_to_bigquery,
+    op_kwargs={
+        'bucket_name': 'buy-to-let-pipeline-bucket',
+        'source_blob_name': 'top_20_yield.csv',
+        'dataset_id': 'buy_to_let_data',
+        'table_id': 'top_20_yield',
+    },
+)
+
+scrape_sale_task >> scrape_rent_task >> clean_task >> aggregate_task >> visualize_net_task >> upload_csv_task >> load_to_bq_task

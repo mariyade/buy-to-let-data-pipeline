@@ -1,1 +1,10 @@
-.env
+keys/
+*.json  
+*.tfstate
+*.tfstate.*
+.terraform/
+*.backup
+terraform.tfvars
+terraform.tfvars.json
+crash.log
+*.log
