@@ -64,7 +64,7 @@ To see what a successful pipeline run looks like, here's a screenshot of the Air
 
 
 - CSVs:
-  - `/opt/airflow/output/buy_listings_with_yields.csv` (all properties with calculated gross/net yields  [artifacts/buy_listings_with_yields.csv](artifacts/buy_listings_with_yields.csv.csv)
+  - `/opt/airflow/output/buy_listings_with_yields.csv` (all properties with calculated gross/net yields  [artifacts/buy_listings_with_yields.csv](artifacts/buy_listings_with_yields.csv)
     
   - /opt/airflow/output/top_20_yield.csv (top 20 by net yield)
 
