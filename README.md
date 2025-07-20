@@ -49,6 +49,11 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 
 ### Outputs and Visuals
 
+To see what a successful pipeline run looks like, here's a screenshot of the Airflow DAG after successful execution:
+
+<img width="1167" height="565" alt="airflow-run" src="https://github.com/user-attachments/assets/3a25b94e-229c-4448-a1c8-dfa2d95ad2c8" />
+
+
 - CSVs:
   - `/opt/airflow/output/buy_listings_with_yields.csv` (all properties with calculated gross/net yields  [artifacts/buy_listings_with_yields.csv](artifacts/buy_listings_with_yields.csv.csv)
     
