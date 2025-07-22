@@ -104,3 +104,9 @@ Google Looker Studio was used to experiment with visualising the final dataset.
 
 The screenshot below shows example insights from a successful run:
 <img width="828" height="648" alt="Screenshot 2025-07-18 at 00 23 07" src="https://github.com/user-attachments/assets/8b7cbff6-2edf-465f-8c47-02c28d7fbead" />
+
+---
+If you have any questions or feedback, feel free to reach out to me:
+
+Mariya Danilova
+[LinkedIn](https://www.linkedin.com/in/mariya-danilova-a31788138)
