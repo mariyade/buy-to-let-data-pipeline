@@ -67,7 +67,7 @@ Terraform provisions Google Cloud resources used in the pipeline:
 
 To see what a successful pipeline run looks like, here's a screenshot of the Airflow DAG after successful execution:
 
-<img width="1167" height="565" alt="airflow-run" src="https://github.com/user-attachments/assets/3a25b94e-229c-4448-a1c8-dfa2d95ad2c8" />
+<img width="1124" height="514" alt="Screenshot 2025-07-22 at 08 42 03" src="https://github.com/user-attachments/assets/886ea4bb-8242-4464-8e51-bd7dbb6d7bbc" />
 
 
 - CSVs:
