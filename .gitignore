@@ -9,3 +9,4 @@ terraform.tfvars.json
 crash.log
 *.log
 __pycache__/
+spark-app/data_land_registry/pp-2024.csv
