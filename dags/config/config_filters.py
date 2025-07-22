@@ -2,7 +2,7 @@ filterSale = {
     'useLocationIdentifier': 'true',
     'radius': 0.25,
     'minPrice': 250000,
-    'maxPrice': 900000,
+    'maxPrice': 300000,
     'minBedrooms': 1,
     'maxBedrooms': 2,
     'propertyTypes': 'flat',
@@ -28,5 +28,5 @@ filterRent = {
 }
 
 scrapeParam = {
-    'max_pages': 2
+    'max_pages': 1
 }

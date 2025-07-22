@@ -9,7 +9,12 @@ End-to-end data pipeline to automate the scraping, processing, and analysis of b
 
 ### Background
 
-This project is a proof of concept (PoC) for automating the analysis of buy-to-let property investment returns. It scrapes listings from Rightmove, calculates gross and net yields, and surfaces the most attractive properties based on yield.
+This project is a proof of concept (PoC) for automating the analysis of buy-to-let property investment returns. The pipeline:
+- scrapes renting and sale listings from Rightmove
+- calculates gross and net rental yields
+- uses official UK data on property sale prices from the Land Registry
+- highlights the best properties based on rental income after costs
+- outputs results to Google Cloud Storage and BigQuery for analysis and visualization
 
 ---
 
@@ -37,6 +42,7 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 - **Cloud storage:** Google Cloud Storage (GCS)
 - **Cloud Data Warehouse:** Google BigQuery
 - **Visualization:** Google Looker Studio, Matplotlib, Seaborn  
+- **Distributed Process:** Apache Spark (for Land Registry data)
 
 ---
 
@@ -45,11 +51,12 @@ For each city, 3 central postcodes were selected. These are defined in `data/pos
 - **Sale Listings:** Rightmove (scraped by postcode and Rightmove-specific `LocationIdentifier`)
 - **Rental Listings:** Rightmove (scraped by postcode and room count)
 - **Stamp Duty:** Based on embedded UK tiered rules
+- **Land Registry:** Sold price data (2024)
 
 ---
 ### Infrastructure Provisioning with Terraform
 
-This project uses **Terraform** to provision and manage Google Cloud resources automatically, enabling infrastructure-as-code and consistent deployment.
+Terraform provisions Google Cloud resources used in the pipeline:
 
 ###  Provisioned Resources:
 - **Google Cloud Storage (GCS) bucket**: `buy-to-let-uk-gcp-2025`

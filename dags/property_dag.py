@@ -9,7 +9,6 @@ import sys
 import os
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/opt/airflow/terraform/keys/my-creds.json"
 
-
 from db import save_to_db, load_from_db
 from tasks.scraping import scrape_listings
 from config.config_filters import filterSale, filterRent, scrapeParam
@@ -17,6 +16,7 @@ from tasks.cleaner import clean_data
 from tasks.yield_calculator import calculate_gross_yield, calculate_net_yield
 from tasks.print_outputs import print_top_20_by_net_yield, print_price_summary
 from tasks.gcp_upload import upload_to_gcs, load_csv_to_bigquery
+from tasks.land_registry_spark_job import run_land_registry_summary
 
 default_args = {
     'owner': 'airflow',
@@ -96,6 +96,7 @@ def clean_listings(**kwargs):
 
 def aggregate_and_calculate(**kwargs):
     os.makedirs('/opt/airflow/output', exist_ok=True)
+    
     df_buy_all = load_from_db('buy_listings')
     df_rent_all = load_from_db('rent_listings')
 
@@ -106,6 +107,18 @@ def aggregate_and_calculate(**kwargs):
 
     df_buy_all['Net_Yield_%'] = df_buy_all['Net_Yield_%'].round(2)
     df_buy_all['Gross_Yield_%'] = df_buy_all['Gross_Yield_%'].round(2)
+
+    path_spark_output = '/opt/airflow/output/avg_sold_price_2024.csv'
+    if os.path.exists(path_spark_output):
+        try:
+            df_avg_sold = pd.read_csv(path_spark_output)
+            df_avg_sold.columns = ['Postcode', 'Avg_Sold_Price_2024']
+            df_buy_all = df_buy_all.merge(df_avg_sold, on='Postcode', how='left')
+        except Exception as e:
+            print(f"Failed to merge with Spark output: {e}")
+    else:
+        print("Spark output file not found: skipping merge.")
+
     df_buy_all.to_csv('buy_listings_with_yields.csv', index=True)
     save_to_db(df_buy_all, 'buy_listings_with_yields', if_exists='replace')
 
@@ -157,6 +170,12 @@ clean_task = PythonOperator(
     dag=dag,
 )
 
+run_land_registry_spark = PythonOperator(
+    task_id='run_land_registry_spark',
+    python_callable=run_land_registry_summary,
+    dag=dag,
+)
+
 aggregate_task = PythonOperator(
     task_id='aggregate_and_calculate',
     python_callable=aggregate_and_calculate,
@@ -192,4 +211,4 @@ load_to_bq_task = PythonOperator(
     },
 )
 
-scrape_sale_task >> scrape_rent_task >> clean_task >> aggregate_task >> visualize_net_task >> upload_csv_task >> load_to_bq_task
+scrape_sale_task >> scrape_rent_task >> clean_task >> run_land_registry_spark >> aggregate_task >> visualize_net_task >> upload_csv_task >> load_to_bq_task

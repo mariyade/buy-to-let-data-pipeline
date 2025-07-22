@@ -19,7 +19,20 @@ services:
       - "5050:80"
     depends_on:
       - postgres
-
+  
+  spark:
+    image: bitnami/spark:latest
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "7077:7077"
+      - "8081:8080"
+    volumes:
+      - ./spark-app:/opt/spark-app
+      - ./spark-app/data_land_registry:/opt/spark-data  
+      - ./dags/data:/opt/spark-dags-data
+      - ./output:/opt/airflow/output
+  
   airflow:
     build: .
     restart: always
@@ -28,7 +41,13 @@ services:
     volumes:
       - ./entrypoint.sh:/opt/airflow/entrypoint.sh
       - ./dags:/opt/airflow/dags
+      - ./dags/data:/opt/airflow/dags/data 
       - ./terraform/keys:/opt/airflow/terraform/keys
+      - ./output:/opt/airflow/output
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./spark-app/data_land_registry:/opt/spark-data
+      - ./dags/data:/opt/spark-dags-data
+
     environment:
       AIRFLOW_UID: "503"
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
