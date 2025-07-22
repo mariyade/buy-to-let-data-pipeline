@@ -9,7 +9,7 @@ End-to-end data pipeline to automate the scraping, processing, and analysis of b
 
 ### Background
 
-This project is a proof of concept (PoC) for automating the analysis of buy-to-let property investment returns. The pipeline:
+This project is a proof of concept (PoC) for automating the analysis of UK buy-to-let properties with tools Spark, Airflow, PostgresSQL, GCP, Docker. The pipeline:
 - scrapes renting and sale listings from Rightmove
 - calculates gross and net rental yields
 - uses official UK data on property sale prices from the Land Registry
