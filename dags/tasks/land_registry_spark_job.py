@@ -3,9 +3,22 @@ from pyspark.sql.functions import col, split, upper, trim
 import shutil
 import glob
 import os
+import requests
 
 def run_land_registry_summary():
     os.environ["HOME"] = "/tmp"
+
+    # Land Registry Price Paid Data (2024 full-year CSV): https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads
+    # Note: The download URL may change each year. For future updates, check the above source for the latest file.
+    download_url = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2024.csv"
+    local_path = "/opt/spark-data/pp-2024.csv"
+
+    if not os.path.exists(local_path):
+        response = requests.get(download_url, stream=True)
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        with open(local_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
 
     spark = SparkSession.builder \
         .appName("Land Registry 2024 Summary") \
@@ -13,7 +26,7 @@ def run_land_registry_summary():
         .config("spark.driver.extraJavaOptions", "-Duser.home=/tmp") \
         .getOrCreate()
 
-    df = spark.read.csv("/opt/spark-data/pp-2024.csv", header=False).toDF(
+    df = spark.read.csv(local_path, header=False).toDF(
         "transaction_id", "price", "date_of_transfer", "postcode", "property_type",
         "new_build", "tenure", "paon", "saon", "street", "locality",
         "town_city", "district", "county", "ppd_category", "status"
